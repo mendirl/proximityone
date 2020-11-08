@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "io.mendirl.proximityoneempty"
+        applicationId "io.mendirl.proximityone"
         minSdkVersion 28
         targetSdkVersion 30
         versionCode 1

@@ -1,4 +1,4 @@
-package io.mendirl.proximityoneempty
+package io.mendirl.proximityone
 
 import org.junit.Test
 

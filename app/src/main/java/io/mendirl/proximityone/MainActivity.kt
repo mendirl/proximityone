@@ -1,4 +1,4 @@
-package io.mendirl.proximityoneempty
+package io.mendirl.proximityone
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
