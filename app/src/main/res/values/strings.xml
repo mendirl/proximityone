@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Proximity One</string>
+    <string name="add_description">Declare a new address</string>
+    <string name="address">Address</string>
+    <string name="ok">ok</string>
+    <string name="nok">cancel</string>
 </resources>
