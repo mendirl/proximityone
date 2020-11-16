@@ -6,9 +6,15 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
+    private val mainScope = MainScope()
+
+    private val api = OpenStreetMapGeoCodingService()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,7 +32,7 @@ class MainActivity : AppCompatActivity() {
                 sendDialogDataToActivity(
                     dialogView.findViewById<EditText>(
                         R.id.new_adress
-                    ).text.toString()
+                    ).text.toString(), this
                 )
             }
             .setNegativeButton(R.string.nok) { dialog, _ -> dialog.cancel() }
@@ -35,8 +41,18 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun sendDialogDataToActivity(data: String) {
-        Toast.makeText(this, data, Toast.LENGTH_SHORT).show()
+    private fun sendDialogDataToActivity(data: String, mainActivity: MainActivity) {
+        var address = GeoPosition(0.0, 0.0, "")
+        mainScope.launch {
+            kotlin.runCatching {
+                api.info(data)
+            }.onSuccess {
+                address = it[0]
+                Toast.makeText(mainActivity, address.displayName, Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(mainActivity, "problem with $data", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 }
