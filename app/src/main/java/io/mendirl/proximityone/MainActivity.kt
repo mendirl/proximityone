@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun sendDialogDataToActivity(data: String, mainActivity: MainActivity) {
-        var address = GeoPosition(0.0, 0.0, "")
+        var address: GeoPosition
         mainScope.launch {
             kotlin.runCatching {
                 api.info(data)
