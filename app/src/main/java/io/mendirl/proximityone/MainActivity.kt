@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.MainScope
@@ -49,10 +50,22 @@ class MainActivity : AppCompatActivity() {
             }.onSuccess {
                 address = it[0]
                 Toast.makeText(mainActivity, address.displayName, Toast.LENGTH_SHORT).show()
+                populate(address)
             }.onFailure {
                 Toast.makeText(mainActivity, "problem with $data", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun populate(address: GeoPosition) {
+        val displayNameTextView = findViewById<TextView>(R.id.displayName)
+        val latitudeTextView = findViewById<TextView>(R.id.latitude)
+        val longitudeTextView = findViewById<TextView>(R.id.longitude)
+
+        displayNameTextView.text =
+            baseContext.getString(R.string.displayName_field, address.displayName)
+        latitudeTextView.text = baseContext.getString(R.string.latitude_field, address.latitude)
+        longitudeTextView.text = baseContext.getString(R.string.longitude_field, address.longitude)
     }
 
 }
