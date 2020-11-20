@@ -96,14 +96,13 @@ class LastKnownLocationService : Service() {
         serviceHandler = Handler(handlerThread.looper)
     }
 
-
     private fun createNotificationManager() {
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val appName = getString(R.string.app_name)
         val notificationChannel = NotificationChannel(CHANNEL_ID, appName, IMPORTANCE_DEFAULT)
+        notificationChannel.enableVibration(false)
         notificationManager.createNotificationChannel(notificationChannel)
     }
-
 
     @SuppressLint("MissingPermission")
     private fun lastLocation() {
