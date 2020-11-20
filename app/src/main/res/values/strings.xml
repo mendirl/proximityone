@@ -6,11 +6,10 @@
     <string name="nok">cancel</string>
     <string name="some_text">ipsos</string>
     <string name="address_title">address</string>
-    <string name="displayName_field">full address: %s</string>
+    <string name="address_displayName_field">full address: %s</string>
     <string name="latitude_field">latitude: %f</string>
     <string name="longitude_field">longitude: %f</string>
     <string name="position_title">position</string>
-    <string name="position">position courante (a remplacer par les valeurs du service gps)</string>
     <string name="distance_title">distance</string>
-    <string name="distance">distance from address: %f</string>
+    <string name="distance">distance from address: %d m</string>
 </resources>
