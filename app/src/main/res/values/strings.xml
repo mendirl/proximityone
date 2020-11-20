@@ -12,4 +12,11 @@
     <string name="position_title">position</string>
     <string name="distance_title">distance</string>
     <string name="distance">distance from address: %d m</string>
+
+    <string name="launch_activity">Launch activity</string>
+    <string name="remove_location_updates">Remove location updates</string>
+    <string name="location_updated">Location Updated: %1$s</string>
+    <string name="saved_address_latitude">saved_address_latitude</string>
+    <string name="saved_address_longitude">saved_address_longitude</string>
+    <string name="saved_address_displayName">saved_address_displayName</string>
 </resources>

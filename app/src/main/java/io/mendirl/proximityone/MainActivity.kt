@@ -2,7 +2,12 @@ package io.mendirl.proximityone
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -35,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private var isBound: Boolean = false
     private val api = OpenStreetMapGeoCodingService()
 
-    private lateinit var address: GeoPosition
+    private var address: GeoPosition? = null
 
 
     // Monitors the state of the connection to the service.
@@ -132,7 +137,8 @@ class MainActivity : AppCompatActivity() {
                 api.info(data)
             }.onSuccess {
                 address = it[0]
-                Toast.makeText(mainActivity, address.displayName, Toast.LENGTH_SHORT).show()
+                putInPreferences(address)
+                Toast.makeText(mainActivity, address?.displayName, Toast.LENGTH_SHORT).show()
                 populate(address)
             }.onFailure {
                 Toast.makeText(mainActivity, "problem with $data", Toast.LENGTH_SHORT).show()
@@ -140,15 +146,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun populate(address: GeoPosition) {
+    private fun putInPreferences(address: GeoPosition?) {
+        val sharedPref = getPreferences(Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+//            address?.latitude?.toFloat()?.let { putFloat(getString(R.string.saved_address_latitude), it) }
+//            address?.latitude?.toFloat()?.let { putFloat(getString(R.string.saved_address_latitude), it) }
+            putFloat(getString(R.string.saved_address_latitude), address?.latitude?.toFloat()!!)
+            putFloat(getString(R.string.saved_address_longitude), address?.longitude?.toFloat()!!)
+            putString(getString(R.string.saved_address_displayName), address?.displayName)
+            apply()
+        }
+    }
+
+    private fun populate(address: GeoPosition?) {
         Log.i(TAG, "populate")
         val displayNameTextView = findViewById<TextView>(R.id.displayName)
         val latitudeTextView = findViewById<TextView>(R.id.addressLatitude)
         val longitudeTextView = findViewById<TextView>(R.id.addressLongitude)
 
-        displayNameTextView.text = baseContext.getString(R.string.address_displayName_field, address.displayName)
-        latitudeTextView.text = baseContext.getString(R.string.latitude_field, address.latitude)
-        longitudeTextView.text = baseContext.getString(R.string.longitude_field, address.longitude)
+        displayNameTextView.text = baseContext.getString(R.string.address_displayName_field, address?.displayName)
+        latitudeTextView.text = baseContext.getString(R.string.latitude_field, address?.latitude)
+        longitudeTextView.text = baseContext.getString(R.string.longitude_field, address?.longitude)
 
         if (!checkPermissions()) {
             Log.i(TAG, "permission ko")
@@ -186,16 +204,30 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun updateLocation(location: Location?) {
+    private fun updateLocation(location: Location) {
         Log.i(TAG, "updateLocation")
         val positionLatitudeTextView = findViewById<TextView>(R.id.positionLatitude)
         val positionLongitudeTextView = findViewById<TextView>(R.id.positionLongitude)
 
-        positionLatitudeTextView.text = baseContext.getString(R.string.latitude_field, location?.latitude)
-        positionLongitudeTextView.text = baseContext.getString(R.string.longitude_field, location?.longitude)
+        positionLatitudeTextView.text = baseContext.getString(R.string.latitude_field, location.latitude)
+        positionLongitudeTextView.text = baseContext.getString(R.string.longitude_field, location.longitude)
+
+        if (address == null) {
+            val sharedPref = getPreferences(Context.MODE_PRIVATE)
+            val prefLatitude = sharedPref.getFloat(getString(R.string.saved_address_latitude), 0F)
+            val prefLongitude = sharedPref.getFloat(getString(R.string.saved_address_longitude), 0F)
+            val prefDisplayName = sharedPref.getString(getString(R.string.saved_address_displayName), "")
+
+            address = GeoPosition(prefLatitude.toDouble(), prefLongitude.toDouble(), prefDisplayName.toString())
+            populate(address)
+        }
 
         val result = FloatArray(1)
-        Location.distanceBetween(address.latitude, address.longitude, location!!.latitude, location.longitude, result)
+        Location.distanceBetween(
+            address?.latitude!!, address?.longitude!!,
+            location.latitude, location.longitude,
+            result
+        )
 
         val distanceTextView = findViewById<TextView>(R.id.distance)
         distanceTextView.text = baseContext.getString(R.string.distance, result[0].toInt())
