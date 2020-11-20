@@ -149,11 +149,9 @@ class MainActivity : AppCompatActivity() {
     private fun putInPreferences(address: GeoPosition?) {
         val sharedPref = getPreferences(Context.MODE_PRIVATE) ?: return
         with(sharedPref.edit()) {
-//            address?.latitude?.toFloat()?.let { putFloat(getString(R.string.saved_address_latitude), it) }
-//            address?.latitude?.toFloat()?.let { putFloat(getString(R.string.saved_address_latitude), it) }
             putFloat(getString(R.string.saved_address_latitude), address?.latitude?.toFloat()!!)
-            putFloat(getString(R.string.saved_address_longitude), address?.longitude?.toFloat()!!)
-            putString(getString(R.string.saved_address_displayName), address?.displayName)
+            putFloat(getString(R.string.saved_address_longitude), address.longitude.toFloat())
+            putString(getString(R.string.saved_address_displayName), address.displayName)
             apply()
         }
     }
@@ -232,7 +230,6 @@ class MainActivity : AppCompatActivity() {
         val distanceTextView = findViewById<TextView>(R.id.distance)
         distanceTextView.text = baseContext.getString(R.string.distance, result[0].toInt())
     }
-
 
     /**
      * Receiver for broadcasts sent by [LastKnownLocationService].

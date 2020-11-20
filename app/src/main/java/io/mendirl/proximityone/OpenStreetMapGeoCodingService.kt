@@ -8,5 +8,4 @@ class OpenStreetMapGeoCodingService : GeoCodingService {
         return client.search(address)
     }
 
-
 }
