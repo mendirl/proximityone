@@ -96,7 +96,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         Log.i(TAG, "onPause")
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(lastKnownLocationServiceReceiver)
+        // commented to keep handling notification when the phone is locked
+        // LocalBroadcastManager.getInstance(this).unregisterReceiver(lastKnownLocationServiceReceiver)
         super.onPause()
     }
 

@@ -236,7 +236,7 @@ class LastKnownLocationService : Service() {
         }
     }
 
-    fun removeLocation() {
+    private fun removeLocation() {
         Log.i(TAG, "Removing location updates")
         try {
             fusedLocationClient.removeLocationUpdates(locationCallback)
