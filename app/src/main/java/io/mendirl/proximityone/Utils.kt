@@ -31,4 +31,8 @@ object Utils {
         PreferenceManager.getDefaultSharedPreferences(context).edit()
             .putBoolean(KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates).apply()
     }
+
+    fun distanceText(distanceFromStart: Int?): CharSequence {
+        return distanceFromStart?.div(1000F).toString() + " km"
+    }
 }

@@ -11,7 +11,7 @@
     <string name="longitude_field">longitude: %f</string>
     <string name="position_title">position</string>
     <string name="distance_title">distance</string>
-    <string name="distance">distance from address: %d m</string>
+    <string name="distance">distance from address: %s</string>
 
     <string name="launch_activity">Launch activity</string>
     <string name="remove_location_updates">Remove location updates</string>

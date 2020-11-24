@@ -12,8 +12,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.os.IBinder
-import android.os.VibrationEffect
-import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -38,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     // The BroadcastReceiver used to listen from broadcasts from the service.
     private lateinit var lastKnownLocationServiceReceiver: LastKnownLocationServiceReceiver
 
-    private lateinit var vibratorService: Vibrator
 
     private var lastKnownLocationService: LastKnownLocationService? = null
     private var isBound: Boolean = false
@@ -68,7 +65,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         lastKnownLocationServiceReceiver = LastKnownLocationServiceReceiver()
-        vibratorService = getSystemService(VIBRATOR_SERVICE) as Vibrator
 
         setContentView(R.layout.activity_main)
     }
@@ -178,7 +174,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissions()
         } else {
             Log.i(TAG, "permission ok")
-            lastKnownLocationService?.requestLocation()
+            lastKnownLocationService?.requestLocation(address)
         }
     }
 
@@ -187,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (checkPermissions()) {
             Log.i(TAG, "Permission was granted")
-            lastKnownLocationService?.requestLocation()
+            lastKnownLocationService?.requestLocation(address)
         }
     }
 
@@ -234,18 +230,12 @@ class MainActivity : AppCompatActivity() {
             result
         )
 
-        tooFarFromHome(result[0].toInt())
 
         val distanceTextView = findViewById<TextView>(R.id.distance)
-        distanceTextView.text = baseContext.getString(R.string.distance, result[0].toInt())
+        val distanceAsText = Utils.distanceText(result[0].toInt())
+        distanceTextView.text = baseContext.getString(R.string.distance, distanceAsText)
     }
 
-    private fun tooFarFromHome(distance: Int) {
-        if (distance > 1000) {
-            Log.w(TAG, "too far from home: $distance")
-            vibratorService.vibrate(VibrationEffect.createOneShot(3000, VibrationEffect.DEFAULT_AMPLITUDE));
-        }
-    }
 
     /**
      * Receiver for broadcasts sent by [LastKnownLocationService].

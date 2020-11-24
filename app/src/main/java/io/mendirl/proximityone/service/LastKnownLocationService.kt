@@ -15,6 +15,8 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -23,6 +25,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import io.mendirl.proximityone.GeoPosition
 import io.mendirl.proximityone.MainActivity
 import io.mendirl.proximityone.R
 import io.mendirl.proximityone.Utils
@@ -45,6 +48,9 @@ class LastKnownLocationService : Service() {
         private const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = UPDATE_INTERVAL_IN_MILLISECONDS / 2
     }
 
+    private var distanceFromStart: Int? = null
+    private var isTooFar: Boolean = false
+    private var startPosition: GeoPosition? = null
 
     private val mBinder: IBinder = LocalBinder()
     private lateinit var locationCallback: LocationCallback
@@ -54,6 +60,7 @@ class LastKnownLocationService : Service() {
     private lateinit var serviceHandler: Handler
 
     private lateinit var notificationManager: NotificationManager
+    private lateinit var vibratorService: Vibrator
 
 
     /**
@@ -71,6 +78,7 @@ class LastKnownLocationService : Service() {
         lastLocation()
         createServiceHandler()
         createNotificationManager()
+        createVibratorManager()
     }
 
     private fun createLocationCallback() {
@@ -104,6 +112,10 @@ class LastKnownLocationService : Service() {
         notificationManager.createNotificationChannel(notificationChannel)
     }
 
+    private fun createVibratorManager() {
+        vibratorService = getSystemService(VIBRATOR_SERVICE) as Vibrator
+    }
+
     @SuppressLint("MissingPermission")
     private fun lastLocation() {
         fusedLocationClient.lastLocation
@@ -121,12 +133,32 @@ class LastKnownLocationService : Service() {
 
         this.location = location
 
+        val result = FloatArray(1)
+        Location.distanceBetween(
+            startPosition?.latitude!!, startPosition?.longitude!!,
+            location.latitude, location.longitude,
+            result
+        )
+
+        distanceFromStart = result[0].toInt()
+        tooFarFromHome(distanceFromStart)
+
         // Notify anyone listening for broadcasts about the new location.
         val intent = Intent(ACTION_BROADCAST)
         intent.putExtra(EXTRA_LOCATION, location)
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+    }
 
-        notificationManager.notify(NOTIFICATION_ID, notificationFromLocation())
+    private fun tooFarFromHome(distance: Int?) {
+        if (distance!! > 1000) {
+            isTooFar = true
+            Log.w(TAG, "too far from home: $distance")
+            vibratorService.vibrate(VibrationEffect.createOneShot(3000, VibrationEffect.DEFAULT_AMPLITUDE));
+            notificationManager.notify(NOTIFICATION_ID, notificationFromLocation())
+        } else if (isTooFar) {
+            isTooFar = false
+            notificationManager.notify(NOTIFICATION_ID, notificationFromLocation())
+        }
     }
 
     private fun notificationFromLocation(): Notification {
@@ -139,7 +171,7 @@ class LastKnownLocationService : Service() {
         val activityPendingIntent =
             PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
 
-        val locationText = Utils.locationText(location)
+        val locationText = Utils.distanceText(distanceFromStart)
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .addAction(R.drawable.ic_launch, getString(R.string.launch_activity), activityPendingIntent)
@@ -224,8 +256,10 @@ class LastKnownLocationService : Service() {
     }
 
     @SuppressLint("MissingPermission")
-    fun requestLocation() {
+    fun requestLocation(address: GeoPosition?) {
         Log.i(TAG, "Requesting location updates")
+        this.startPosition = address
+
         Utils.requestingLocationUpdates(this, true)
         startService(Intent(applicationContext, LastKnownLocationService::class.java))
         try {
