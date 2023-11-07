@@ -34,7 +34,7 @@ android {
 }
 
 dependencies {
-    ext.ktor_version = "2.3.4"
+    ext.ktor_version = "2.3.6"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
